@@ -5,3 +5,12 @@ module "network" {
   vpc_cidr     = var.vpc_cidr
   admin_cidr   = var.admin_cidr
 }
+
+module "compute" {
+  source = "../../modules/compute"
+
+  project_name = var.project_name
+  vpc_id       = module.network.vpc_id
+  subnet_id    = module.network.public_subnet_id
+  sg_id        = module.network.sg_cluster_id
+}
