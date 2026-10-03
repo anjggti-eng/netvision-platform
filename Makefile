@@ -9,15 +9,18 @@ TF_BOOT_DIR := infra/bootstrap
 help: ## Mostra os alvos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
-init: ## terraform init (bootstrap + env)
+init: ## terraform init (módulos + providers; backend via init-backend)
 	terraform -chdir=$(TF_BOOT_DIR) init -input=false
-	terraform -chdir=$(TF_ENV_DIR) init -input=false
+	terraform -chdir=$(TF_ENV_DIR) init -backend=false -input=false
 
-validate: fmt ## fmt -check + tflint + validate em todos os módulos
-	terraform -chdir=$(TF_BOOT_DIR) fmt -check -recursive || (terraform -chdir=$(TF_BOOT_DIR) fmt -recursive && exit 1)
-	terraform -chdir=$(TF_ENV_DIR) fmt -check -recursive || (terraform -chdir=$(TF_ENV_DIR) fmt -recursive && exit 1)
+init-backend: ## init com backend real (requer backend.hcl — ver backend.hcl.example)
+	terraform -chdir=$(TF_ENV_DIR) init -backend=false -input=false
+	terraform -chdir=$(TF_ENV_DIR) init -backend-config=backend.hcl -input=false -reconfigure
+
+validate: ## fmt -check + tflint + validate em todos os módulos
+	terraform fmt -check -recursive infra
 	terraform -chdir=$(TF_BOOT_DIR) validate
-	terraform -chdir=$(TF_ENV_DIR) validate -backend=false
+	terraform -chdir=$(TF_ENV_DIR) validate
 	tflint --chdir=$(TF_BOOT_DIR)
 	tflint --chdir=$(TF_ENV_DIR)
 
@@ -41,9 +44,10 @@ apply: ## terraform apply do ambiente prod
 destroy: ## terraform destroy do ambiente prod
 	terraform -chdir=$(TF_ENV_DIR) destroy -input=false
 
-up: ## Sobe tudo: bootstrap + env (cluster k3sspot)
+up: ## Sobe tudo: bootstrap + env (cluster k3s spot)
 	$(MAKE) -C . init
 	terraform -chdir=$(TF_BOOT_DIR) apply -input=false -auto-approve
+	$(MAKE) init-backend
 	terraform -chdir=$(TF_ENV_DIR) apply -input=false -auto-approve
 	@echo "==> Aguardando nó k3s Ready..."
 	./scripts/verify_cluster.sh
