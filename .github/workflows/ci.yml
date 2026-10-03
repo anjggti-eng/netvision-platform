@@ -107,6 +107,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
     defaults:
       run:
         working-directory: apps/netvision
