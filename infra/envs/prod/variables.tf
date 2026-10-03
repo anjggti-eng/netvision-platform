@@ -31,3 +31,9 @@ variable "budget_limit_usd" {
   default     = "5"
   description = "Limite mensal USD do budget guardrail."
 }
+
+variable "github_repo" {
+  type        = string
+  default     = "anjggti-eng/netvision-platform"
+  description = "Repo GitHub (owner/name) autorizado a assumir a role OIDC."
+}

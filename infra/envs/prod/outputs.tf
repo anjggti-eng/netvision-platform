@@ -27,3 +27,8 @@ output "billing_topic_arn" {
   description = "SNS topic de alertas de custo."
   value       = module.budget.billing_topic_arn
 }
+
+output "gha_role_arn" {
+  description = "Setar como variável AWS_ROLE_ARN no repo GitHub."
+  value       = module.oidc.gha_role_arn
+}

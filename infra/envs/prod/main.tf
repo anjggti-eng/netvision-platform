@@ -22,3 +22,19 @@ module "budget" {
   budget_email     = var.budget_email
   budget_limit_usd = var.budget_limit_usd
 }
+
+data "aws_caller_identity" "current" {}
+
+locals {
+  state_bucket     = "${var.project_name}-tfstate-${data.aws_caller_identity.current.account_id}"
+  state_lock_table = "${var.project_name}-tflock"
+}
+
+module "oidc" {
+  source = "../../modules/oidc"
+
+  project_name         = var.project_name
+  github_repo          = var.github_repo
+  state_bucket_arn     = "arn:aws:s3:::${local.state_bucket}"
+  state_lock_table_arn = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${local.state_lock_table}"
+}
