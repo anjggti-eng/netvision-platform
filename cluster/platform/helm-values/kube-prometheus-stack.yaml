@@ -1,0 +1,53 @@
+# kube-prometheus-stack — retenção curta (custo/disco) + Loki como fonte de logs.
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    retentionSize: "8GB"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+
+grafana:
+  # senha de demo — troque no primeiro login; ver docs/runbook.md
+  adminPassword: grafana-admin
+  persistence:
+    enabled: false
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+    datasources:
+      enabled: true
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://loki:3100
+      editable: true
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true

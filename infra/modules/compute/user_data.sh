@@ -10,7 +10,6 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.31.3+k3s1" sh -s - server
   --node-name="$(hostname)" \
   --write-kubeconfig-mode=644 \
   --disable=traefik \
-  --disable=servicelb \
   --tls-san="$(curl -s --max-time 5 http://169.254.169.254/latest/meta-data/public-ipv4 || echo 127.0.0.1)"
 
 # Espera a API local ficar de pé antes de declarar sucesso

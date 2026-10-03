@@ -1,0 +1,8 @@
+# ingress-nginx — expõe 80/443 via klipper-lb (servicelb do k3s) na instância EC2.
+controller:
+  service:
+    type: LoadBalancer
+  config:
+    use-forwarded-headers: "true"
+  metrics:
+    enabled: true

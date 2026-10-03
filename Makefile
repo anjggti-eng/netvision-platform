@@ -4,7 +4,7 @@ SHELL := /bin/bash
 TF_ENV_DIR := infra/envs/prod
 TF_BOOT_DIR := infra/bootstrap
 
-.PHONY: help init validate lint kubeconform plan apply destroy up down dashboards verify fmt
+.PHONY: help init init-backend validate lint kubeconform plan apply destroy up down dashboards verify fmt gitops
 
 help: ## Mostra os alvos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -29,11 +29,11 @@ fmt: ## terraform fmt em todos os diretórios
 
 lint: validate ## alias de validate
 
-kubeconform: ## valida todos os manifests K8s
-	kustomize build cluster/gitops | kubeconform -strict -summary
-	kustomize build cluster/platform | kubeconform -strict -summary || true
-	kustomize build cluster/workloads/netvision | kubeconform -strict -summary
-	kustomize build cluster/workloads/demo | kubeconform -strict -summary
+kubeconform: ## valida todos os manifests K8s (CRDs de terceiros: skip)
+	@for d in gitops platform workloads/netvision workloads/demo; do \
+		echo "==> $$d"; \
+		kustomize build cluster/$$d | kubeconform -strict -summary -ignore-missing-schemas || exit 1; \
+	done
 
 plan: ## terraform plan do ambiente prod
 	terraform -chdir=$(TF_ENV_DIR) plan -input=false
@@ -66,3 +66,6 @@ dashboards: ## Imprime URLs do Grafana (port-forward)
 
 verify: ## Verifica se o cluster k3s está Ready
 	./scripts/verify_cluster.sh
+
+gitops: ## Instala ArgoCD (Helm) e aplica a app raiz (requer kubeconfig)
+	./scripts/bootstrap_gitops.sh
