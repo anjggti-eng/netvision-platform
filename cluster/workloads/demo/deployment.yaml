@@ -1,0 +1,72 @@
+# Demo 1/2: servidor whoami — gera acesso HTTP + logs para dashboards/Loki.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whoami
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo-whoami
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: demo-whoami
+        app.kubernetes.io/part-of: netvision-platform
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.10.3
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+# Demo 2/2: loadgen — tráfego contínuo para quem observa (métricas + logs reais).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: demo-loadgen
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: demo-loadgen
+        app.kubernetes.io/part-of: netvision-platform
+    spec:
+      containers:
+        - name: loadgen
+          image: busybox:1.37
+          command:
+            - /bin/sh
+            - -c
+            - |
+              while true; do
+                wget -qO- http://demo-whoami:80 > /dev/null 2>&1 || true
+                wget -qO- http://netvision.netvision.svc:8080/metrics > /dev/null 2>&1 || true
+                echo "$(date -u +%FT%TZ) loadgen tick"
+                sleep 2
+              done
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
