@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nv-node-high-cpu
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+    app.kubernetes.io/part-of: netvision-platform
+spec:
+  groups:
+    - name: netvision.node
+      rules:
+        - alert: NodeHighCPUUsage
+          expr: |
+            100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "CPU acima de 85% em {{ $labels.instance }}"
+            description: "Uso médio de CPU em {{ $labels.instance }} está {{ $value | printf \"%.1f\" }}% há mais de 5 minutos."
+            runbook_url: "https://github.com/anjggti-eng/netvision-platform/blob/main/docs/runbook.md"

@@ -85,3 +85,17 @@ jobs:
       - name: plan pulado (sem AWS_ROLE_ARN)
         if: ${{ vars.AWS_ROLE_ARN == '' }}
         run: echo "::notice::Variável AWS_ROLE_ARN não definida — plan pulado. Ver docs/runbook.md."
+
+  manifests:
+    name: kubeconform / alertas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: instalar kustomize + kubeconform
+        run: |
+          curl -sL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz | tar -xz -C /usr/local/bin kustomize
+          curl -sL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar -xz -C /usr/local/bin kubeconform
+      - name: kubeconform (strict)
+        run: make kubeconform
+      - name: checks de alertas e dashboards
+        run: ./scripts/check_alerts.sh

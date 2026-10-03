@@ -1,0 +1,68 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "Restarts de pods",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        {
+          "expr": "sum by (namespace, pod) (increase(kube_pod_container_status_restarts_total[1h]))",
+          "legendFormat": "{{namespace}}/{{pod}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Fase de pods não Running",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] },
+      "targets": [
+        {
+          "expr": "count(kube_pod_status_phase{phase=~\"Failed|Pending|Unknown\",namespace!=\"\"} > 0) OR on() vector(0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "CPU de containers (top 10)",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 18, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        {
+          "expr": "topk(10, sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\"}[5m])))",
+          "legendFormat": "{{namespace}}/{{pod}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Logs por namespace (Loki)",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "{namespace=~\".+\"}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["netvision", "workloads"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "title": "NetVision — Workloads",
+  "uid": "nv-workloads",
+  "version": 1
+}

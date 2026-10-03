@@ -1,3 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-resources: []
+
+resources:
+  - alerts/node-high-cpu.yaml
+  - alerts/pod-down.yaml
+
+configMapGenerator:
+  - name: nv-dashboards
+    namespace: monitoring
+    files:
+      - dashboards/node.json
+      - dashboards/pods.json
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/part-of: netvision-platform
