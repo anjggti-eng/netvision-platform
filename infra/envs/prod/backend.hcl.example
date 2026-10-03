@@ -1,0 +1,6 @@
+# Copie para backend.hcl e ajuste com a conta real (account id via `aws sts get-caller-identity`).
+bucket         = "netvision-tfstate-ACCOUNT_ID"
+key            = "prod/terraform.tfstate"
+region         = "sa-east-1"
+dynamodb_table = "netvision-tflock"
+encrypt        = true

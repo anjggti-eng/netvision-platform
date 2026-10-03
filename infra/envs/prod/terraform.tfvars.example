@@ -1,0 +1,7 @@
+# Copie para terraform.tfvars (gitignorado) e ajuste.
+region      = "sa-east-1"
+project_name = "netvision"
+vpc_cidr    = "10.0.0.0/16"
+
+# SEU IP público /32 — nunca 0.0.0.0/0 (o CI falha no check_no_nat).
+admin_cidr = "200.200.200.200/32"
