@@ -14,3 +14,11 @@ module "compute" {
   subnet_id    = module.network.public_subnet_id
   sg_id        = module.network.sg_cluster_id
 }
+
+module "budget" {
+  source = "../../modules/budget"
+
+  project_name     = var.project_name
+  budget_email     = var.budget_email
+  budget_limit_usd = var.budget_limit_usd
+}

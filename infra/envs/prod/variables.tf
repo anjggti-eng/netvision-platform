@@ -20,3 +20,14 @@ variable "admin_cidr" {
   type        = string
   description = "CIDR autorizado no SSH (22/tcp). NUNCA use 0.0.0.0/0 — ex.: 189.1.2.3/32."
 }
+
+variable "budget_email" {
+  type        = string
+  description = "E-mail para alertas de custo (budget US$5)."
+}
+
+variable "budget_limit_usd" {
+  type        = string
+  default     = "5"
+  description = "Limite mensal USD do budget guardrail."
+}

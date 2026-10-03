@@ -22,3 +22,8 @@ output "k3s_instance_tag" {
   description = "Tag para descobrir a instância."
   value       = module.compute.k3s_instance_tag
 }
+
+output "billing_topic_arn" {
+  description = "SNS topic de alertas de custo."
+  value       = module.budget.billing_topic_arn
+}
