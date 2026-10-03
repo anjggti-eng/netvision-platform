@@ -130,7 +130,7 @@ jobs:
         run: docker build -t netvision:ci .
 
       - name: trivy (HIGH/CRITICAL bloqueia)
-        uses: aquasecurity/trivy-action@0.29.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: netvision:ci
           format: table
